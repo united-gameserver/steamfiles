@@ -1,18 +1,18 @@
 import os
-import setuptools
-try: # for pip >= 10
-    from pip._internal.req import parse_requirements
-    from pip._internal.download import PipSession
-except ImportError: # for pip <= 9.0.3
-    from pip.req import parse_requirements
-    from pip.download import PipSession
-
+from setuptools import setup, find_packages
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
 
+def parse_requirements(filename):
+    """ load requirements from a pip requirements file """
+    lineiter = (line.strip() for line in open(filename))
+    return [line for line in lineiter if line and not line.startswith("#")]
 
-setuptools.setup(
+reqs = parse_requirements('requirements.txt')
+reqs_test = parse_requirements('requirements_test.txt')
+
+setup(
     name='steamfiles',
     version='0.1.4',
     url='https://github.com/leovp/steamfiles',
@@ -29,16 +29,14 @@ setuptools.setup(
     package_data={'': ['README.rst', 'LICENSE']},
 
     platforms=['any'],
-    packages=setuptools.find_packages(exclude=['tests']),
 
+    packages=find_packages(exclude=['tests']),
     install_requires=[
-        str(req.req) for req in parse_requirements('requirements.txt',
-                                                   session=PipSession())
+        str(req) for req in reqs
         ],
 
     tests_require=[
-        str(req.req) for req in parse_requirements('requirements_test.txt',
-                                                   session=PipSession())
+        str(req) for req in reqs_test
         ],
 
     classifiers=[
